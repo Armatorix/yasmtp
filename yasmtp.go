@@ -43,9 +43,6 @@ type Input struct {
 	AdditionalHeaders map[string]string
 }
 
-// TODO: validate body
-// add text/html support/
-// add options support (headers/optional text attach etc.)
 func SendHTML(ctx context.Context, i *Input) error {
 	if err := validate.Struct(i); err != nil {
 		return fmt.Errorf("field validation: %w", err)
@@ -106,7 +103,18 @@ func send(ctx context.Context, addr string, a smtp.Auth, from string, to []strin
 			return err
 		}
 	}
-	c, err := smtp.Dial(addr)
+	d := net.Dialer{}
+	conn, err := d.DialContext(ctx, "tcp", addr)
+	if err != nil {
+		return err
+	}
+	if deadline, ok := ctx.Deadline(); ok {
+		if err := conn.SetDeadline(deadline); err != nil {
+			return err
+		}
+	}
+	defer conn.Close()
+	c, err := smtp.NewClient(conn, addr)
 	if err != nil {
 		return err
 	}
