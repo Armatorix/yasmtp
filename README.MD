@@ -35,3 +35,7 @@ aaaand that's it.
 
 ## Links
 * [send with gmail](https://www.123formbuilder.com/docs/setting-up-smtp-with-2-step-verification-on/)
+
+## TODO:
+[] option for local testing
+[] handling non-html
