@@ -12,12 +12,15 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-const MessageIDHeader = "Message-ID"
+const (
+	GmailSMTPHostPort = "smtp.gmail.com:587"
+	MessageIDHeader   = "Message-ID"
+)
 
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type From struct {
-	ServerHostPort string `validate:"hostname_port,required"`
+	ServerHostPort string `validate:"required"`
 	Password       string `validate:"required"`
 	Email          string `validate:"email,required"`
 	Name           string
@@ -52,7 +55,10 @@ func SendHTML(ctx context.Context, i *Input) error {
 		return errors.New("no recipients")
 	}
 
-	host, _, _ := net.SplitHostPort(i.From.ServerHostPort)
+	host, _, err := net.SplitHostPort(i.From.ServerHostPort)
+	if err != nil {
+		return err
+	}
 	auth := smtp.PlainAuth("", i.From.Email, i.From.Password, host)
 	if i.Msg.Id != "" {
 		i.AdditionalHeaders[MessageIDHeader] = i.Msg.Id
@@ -95,6 +101,10 @@ func SendHTML(ctx context.Context, i *Input) error {
 
 // send is created based on smtp.SendMail, extended by context
 func send(ctx context.Context, addr string, a smtp.Auth, from string, to []string, msg []byte) error {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		return err
+	}
 	if err := validateLine(from); err != nil {
 		return err
 	}
@@ -119,12 +129,7 @@ func send(ctx context.Context, addr string, a smtp.Auth, from string, to []strin
 		return err
 	}
 	defer c.Close()
-	// TODO: verify need of hello
-	// if err = c.hello(); err != nil {
-	// 	return err
-	// }
 
-	host, _, _ := net.SplitHostPort(addr)
 	if err = c.StartTLS(&tls.Config{
 		ServerName:         host,
 		InsecureSkipVerify: false,

@@ -4,6 +4,7 @@ Created for simplare SMTP client usage, as most of the time you simply want to s
 
 Additionally it handles context - which does not come by default from net/smtp.
 
+## Example
 ```go
 package main
 
@@ -32,3 +33,5 @@ func main() {
 
 aaaand that's it.
 
+## Links
+* [send with gmail](https://www.123formbuilder.com/docs/setting-up-smtp-with-2-step-verification-on/)
