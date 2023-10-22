@@ -55,11 +55,7 @@ func SendHTML(ctx context.Context, i *Input) error {
 		return errors.New("no recipients")
 	}
 
-	host, _, err := net.SplitHostPort(i.From.ServerHostPort)
-	if err != nil {
-		return err
-	}
-	auth := smtp.PlainAuth("", i.From.Email, i.From.Password, host)
+	auth := smtp.PlainAuth("", i.From.Email, i.From.Password, i.From.ServerHostPort)
 	if i.Msg.Id != "" {
 		i.AdditionalHeaders[MessageIDHeader] = i.Msg.Id
 	}
