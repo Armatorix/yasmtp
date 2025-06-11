@@ -20,9 +20,9 @@ const (
 var validate = validator.New(validator.WithRequiredStructEnabled())
 
 type From struct {
-	ServerHostPort string `validate:"required"`
-	Password       string `validate:"required"`
-	Email          string `validate:"email,required"`
+	ServerHostPort string    `validate:"required"`
+	Email          string    `validate:"email,required"`
+	Auth           smtp.Auth `validate:"required"`
 	Name           string
 }
 
@@ -55,7 +55,6 @@ func SendHTML(ctx context.Context, i *Input) error {
 		return errors.New("no recipients")
 	}
 
-	auth := smtp.PlainAuth("", i.From.Email, i.From.Password, i.From.ServerHostPort)
 	if i.Msg.Id != "" {
 		i.AdditionalHeaders[MessageIDHeader] = i.Msg.Id
 	}
@@ -88,7 +87,7 @@ func SendHTML(ctx context.Context, i *Input) error {
 	return send(
 		ctx,
 		i.From.ServerHostPort,
-		auth,
+		i.From.Auth,
 		i.From.Email,
 		recipients,
 		[]byte(msgBuilder.String()),
