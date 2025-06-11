@@ -55,6 +55,10 @@ func SendHTML(ctx context.Context, i *Input) error {
 		return errors.New("no recipients")
 	}
 
+	if i.AdditionalHeaders == nil {
+		i.AdditionalHeaders = make(map[string]string)
+	}
+
 	if i.Msg.Id != "" {
 		i.AdditionalHeaders[MessageIDHeader] = i.Msg.Id
 	}
